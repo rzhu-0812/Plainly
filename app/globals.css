@@ -1,0 +1,8 @@
+@import "tailwindcss";
+
+@theme {
+  --color-navy-dark: #020617;
+  --color-navy-card: #0f172a;
+}
+
+@variant dark (&:where(.dark, .dark *));
