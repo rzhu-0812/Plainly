@@ -54,7 +54,7 @@ export default function Plainly() {
       }
 
       const formData = new FormData();
-      formData.append('file', file);
+      formData.append('file', uploadedFile);
 
       const response = await OCR(formData);
 
