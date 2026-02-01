@@ -15,6 +15,7 @@ export default function Plainly() {
 
   const [result, setResult] = useState<string | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
+  const [progress, setProgress] = useState<string>("");
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -29,44 +30,93 @@ export default function Plainly() {
     localStorage.setItem('theme', newTheme ? 'dark' : 'light');
   };
 
-  const fileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const handleFiles = (files: FileList | null) => {
+    if (!files || files.length === 0) return;
+    processDocument(files[0]);
+  };
 
+  const processDocument = async (file: File) => {
     setAnalyzing(true);
     setResult(null);
+    setProgress("");
+    let fullText = "";
 
     try {
-      let uploadedFile = file;
+      if (file.type === 'application/pdf') {
+        const pdfjs = await import('pdfjs-dist');
+        pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
-      if (file.type.startsWith('image/')) {
-        const options = {
-          maxSizeMB: 1.5,
-          maxWidthOrHeight: 2048,
-          useWebWorker: true
-        };
+        const arrayBuff = await file.arrayBuffer();
+        const pdf = await pdfjs.getDocument({ data: arrayBuff }).promise;
 
-        try {
-          uploadedFile = await imageCompression(file, options);
-        } catch (err) {
-          console.error("Compression failed, using original", err);
+        for (let i = 1; i <= pdf.numPages; i++) {
+          const page = await pdf.getPage(i);
+          const viewport = page.getViewport({ scale: 2 });
+
+          const canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          if (context) {
+            await page.render({
+              canvasContext: context, 
+              viewport,
+              canvas: canvas
+            }).promise;
+
+            const blob = await new Promise<Blob | null>((resolve) =>
+              canvas.toBlob((b) => resolve(b), 'image/jpeg', 0.85)
+            );
+
+            if (blob) {
+              const formData = new FormData();
+              formData.append('file', blob, `page-${i}.jpg`);
+              
+              const response = await OCR(formData);
+              if (response.success) {
+                fullText += (fullText ? "\n\n" : "") + response.text;
+                setResult(fullText);
+              }
+            }
+          }
         }
-      }
-
-      const formData = new FormData();
-      formData.append('file', uploadedFile);
-
-      const response = await OCR(formData);
-
-      if (response.success) {
-        setResult(response.text || "No text extracted");
       } else {
-        alert("Error: " + (response.error || "Unknown error"));
+        let compressed = file;
+
+        if (file.type.startsWith('image/')) {
+          const options = {
+            maxSizeMB: 1.5,
+            maxWidthOrHeight: 2048,
+            useWebWorker: true
+          };
+
+          try {
+            compressed = await imageCompression(file, options);
+          } catch (err) {
+            console.error("Compression failed, using original", err);
+          }
+        }
+
+        const formData = new FormData();
+        formData.append('file', compressed);
+
+        const response = await OCR(formData);
+
+        if (response.success) {
+          setResult(response.text || "No text extracted");
+        } else {
+          alert("Error: " + (response.error || "Unknown error"));
+        }
       }
     } catch (err) {
       alert("Error communicating with OCR");
     } finally {
       setAnalyzing(false);
+      setProgress("");
+      if (fileInput.current) {
+        fileInput.current.value = ""
+      };
     }
   };
 
@@ -77,7 +127,7 @@ export default function Plainly() {
       <input
         type="file"
         ref={fileInput}
-        onChange={fileChange}
+        onChange={(e) => handleFiles(e.target.files)}
         accept="image/*,application/pdf"
         className="hidden"
         capture="environment"
@@ -96,7 +146,7 @@ export default function Plainly() {
             <div className="hidden md:flex items-center gap-6 text-sm font-medium text-slate-500 dark:text-slate-400">
               <a href="#" className="text-blue-600 dark:text-blue-400">Workspace</a>
               <a href="#" className="hover:text-slate-900 dark:hover:text-slate-100 transition">History</a>
-              <a href="#" className="hover:text-slate-900 dark:hover:text-slate-100 transition">Community</a>
+              <a href="#" className="hover:text-slate-900 dark:hover:text-slate-100 transition">Reminders</a>
             </div>
           </div>
 
@@ -139,7 +189,12 @@ export default function Plainly() {
                 <ChevronRight className="w-4 h-4 opacity-50 group-hover:translate-x-1 transition-transform" />
               </button>
 
-              <div className="relative group cursor-pointer">
+              <div 
+                onClick={() => fileInput.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => { e.preventDefault(); e.stopPropagation(); handleFiles(e.dataTransfer.files); }}
+                className="relative group cursor-pointer w-full"
+              >
                 <div className="absolute inset-0 bg-blue-500/5 rounded-lg border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-blue-400 dark:group-hover:border-blue-500/50 transition-colors" />
                 <div className="relative p-10 flex flex-col items-center justify-center text-center gap-3 cursor-pointer">
                   <Upload className="w-6 h-6 text-slate-400 group-hover:text-blue-500 transition-colors" />

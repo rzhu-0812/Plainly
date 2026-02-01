@@ -10,8 +10,8 @@ export async function OCR(formData: FormData) {
 		const buff = Buffer.from(await file.arrayBuffer());
 
 		const [result] = await visionClient.documentTextDetection({
-			image: {content: buff}
-		});
+			image: { content: buff }
+		});	
 
 		const text = result.fullTextAnnotation?.text || "No text found";
 
