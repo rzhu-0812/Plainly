@@ -30,6 +30,8 @@ export default function Plainly() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const [original, setOriginal] = useState<string | null>(null);
+
   const fileInput = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -57,6 +59,9 @@ export default function Plainly() {
     let fullText = "";
 
     try {
+      const url = URL.createObjectURL(file);
+      setOriginal(url);
+
       if (file.type === "application/pdf") {
         setProgress("Processing PDF...");
 
@@ -249,8 +254,14 @@ export default function Plainly() {
               </button>
 
               <div
-                onClick={() => !busy || fileInput.current?.click()}
-                className={`group relative w-full cursor-pointer ${busy ? "pointer-events-none opacity-50" : ""}`}
+                onClick={() => !busy && fileInput.current?.click()}
+                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                onDrop={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation(); 
+                  if (!busy) handleFiles(e.dataTransfer.files); 
+                }}
+                className={`group relative w-full cursor-pointer transition-opacity ${busy ? "pointer-events-none opacity-50" : ""}`}
               >
                 <div className="absolute inset-0 rounded-lg border-2 border-dashed border-slate-200 bg-blue-500/5 transition-colors group-hover:border-blue-400 dark:border-slate-800 dark:group-hover:border-blue-500/50" />
                 <div className="relative flex cursor-pointer flex-col items-center justify-center gap-3 p-10 text-center">
@@ -293,7 +304,11 @@ export default function Plainly() {
 
                     <div className="flex flex-col items-start gap-2 md:items-end">
                       <div
-                        className={`rounded px-2 py-0.5 text-[10px] font-black tracking-wider uppercase ${summary?.urgency === "High" ? "bg-red-100 text-red-600" : "bg-blue-100 text-blue-600"}`}
+                        className={`rounded px-2 py-0.5 text-[10px] font-black tracking-wider uppercase ${
+                          summary?.urgency 
+                            ? `urgency-${summary.urgency.toLowerCase()}` 
+                            : 'urgency-no'
+                        }`}
                       >
                         {summary?.urgency || "No"} Urgency
                       </div>
@@ -351,7 +366,11 @@ export default function Plainly() {
 
                 <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-8 py-4 dark:border-slate-800 dark:bg-slate-900/50">
                   <div className="flex items-center gap-4">
-                    <button className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400">
+                    <button 
+                      onClick={() => window.open(original!, '_blank')}
+                      disabled={!original}
+                      className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
+                    >
                       View Original Document
                     </button>
                     <button className="text-xs font-bold text-slate-400 hover:underline">
