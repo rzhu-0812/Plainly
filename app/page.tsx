@@ -172,7 +172,6 @@ export default function Plainly() {
         onChange={(e) => handleFiles(e.target.files)}
         accept="image/*,application/pdf"
         className="hidden"
-        capture="environment"
       />
 
       <div className="min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors duration-300 selection:bg-blue-100 dark:bg-[#020617] dark:text-slate-100 dark:selection:bg-blue-900">
@@ -255,11 +254,14 @@ export default function Plainly() {
 
               <div
                 onClick={() => !busy && fileInput.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); e.stopPropagation(); }}
-                onDrop={(e) => { 
-                  e.preventDefault(); 
-                  e.stopPropagation(); 
-                  if (!busy) handleFiles(e.dataTransfer.files); 
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!busy) handleFiles(e.dataTransfer.files);
                 }}
                 className={`group relative w-full cursor-pointer transition-opacity ${busy ? "pointer-events-none opacity-50" : ""}`}
               >
@@ -305,9 +307,9 @@ export default function Plainly() {
                     <div className="flex flex-col items-start gap-2 md:items-end">
                       <div
                         className={`rounded px-2 py-0.5 text-[10px] font-black tracking-wider uppercase ${
-                          summary?.urgency 
-                            ? `urgency-${summary.urgency.toLowerCase()}` 
-                            : 'urgency-no'
+                          summary?.urgency
+                            ? `urgency-${summary.urgency.toLowerCase()}`
+                            : "urgency-no"
                         }`}
                       >
                         {summary?.urgency || "No"} Urgency
@@ -366,8 +368,8 @@ export default function Plainly() {
 
                 <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50 px-8 py-4 dark:border-slate-800 dark:bg-slate-900/50">
                   <div className="flex items-center gap-4">
-                    <button 
-                      onClick={() => window.open(original!, '_blank')}
+                    <button
+                      onClick={() => window.open(original!, "_blank")}
                       disabled={!original}
                       className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
                     >

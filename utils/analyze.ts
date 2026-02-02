@@ -5,8 +5,11 @@ import { Summary } from "@/types/types";
 
 export async function summarizeText(text: string): Promise<Summary | null> {
   try {
-    const today = new Date().toLocaleDateString('en-US', { 
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
+    const today = new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     const prompt = `
