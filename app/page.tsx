@@ -92,17 +92,17 @@ export default function Plainly() {
     setSummary(null);
     setOriginal(null);
     setProgress("");
-    let fullText = "";
+    let text = "";
+
+    const url = URL.createObjectURL(file);
+    setOriginal(url);
 
     try {
-      const url = URL.createObjectURL(file);
-      setOriginal(url);
-
       if (file.type === "application/pdf") {
         setProgress("Processing PDF...");
 
         const pdfjs = await import("pdfjs-dist");
-        pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+        pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 
         const arrayBuff = await file.arrayBuffer();
         const pdf = await pdfjs.getDocument({ data: arrayBuff }).promise;
@@ -132,8 +132,8 @@ export default function Plainly() {
 
               const response = await OCR(formData);
               if (response.success) {
-                fullText += (fullText ? "\n\n" : "") + response.text;
-                setResult(fullText);
+                text += (text ? "\n\n" : "") + response.text;
+                setResult(text);
               }
             }
           }
@@ -164,27 +164,28 @@ export default function Plainly() {
         const response = await OCR(formData);
 
         if (response.success) {
-          fullText = response.text || "No text extracted";
-          setResult(fullText);
+          text = response.text || "No text extracted";
+          setResult(text);
         } else {
           alert("Error: " + (response.error || "Unknown error"));
         }
       }
 
-      if (fullText) {
+      if (text) {
         setLoading(true);
         setProgress("Intrepreting document...");
 
-        const aiSummary = await summarizeText(fullText);
+        const aiSummary = await summarizeText(text);
 
         if (aiSummary) {
           setSummary(aiSummary);
           setProgress("Saving to Supabase...");
 
-          const saved = await saveDoc(file, aiSummary, fullText, deviceId);
+          const saved = await saveDoc(file, aiSummary, text, deviceId);
 
           if (saved.success) {
             console.log("Document saved in Supabase!");
+            URL.revokeObjectURL(url);
             setOriginal(saved.data.file_url);
             fetchHistory();
           }
@@ -193,6 +194,7 @@ export default function Plainly() {
         }
       }
     } catch (err) {
+      URL.revokeObjectURL(url);
       alert("Error communicating with OCR");
     } finally {
       setAnalyzing(false);

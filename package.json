@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{js,jsx,ts,tsx,css,md,json}\"",
-    "format:all": "prettier --write ."
+    "format:all": "prettier --write .",
+    "postinstall": "copyfiles -f node_modules/pdfjs-dist/build/pdf.worker.min.mjs public/"
   },
   "dependencies": {
     "@google-cloud/vertexai": "^1.10.0",
@@ -29,6 +30,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "copyfiles": "^2.4.1",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prettier-plugin-tailwindcss": "^0.7.2",
