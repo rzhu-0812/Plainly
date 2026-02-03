@@ -15,12 +15,13 @@ export default function UploadSidebar({
   return (
     <aside className="space-y-10 border-r border-slate-200 bg-white p-8 lg:col-span-4 dark:border-slate-800 dark:bg-[#020617]">
       <div className="space-y-4">
-        <h1 className="text-3xl leading-tight font-semibold tracking-tight">
-          Translate bureaucracy into <span className="italic">action.</span>
+        <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
+          Paperwork explained in
+          <span className="mt-1 block italic text-blue-600">plain English.</span>
         </h1>
-        <p className="leading-relaxed text-slate-500 dark:text-slate-400">
-          Clarity for small businesses and families navigating government
-          documentation.
+        <p className="text-base leading-relaxed text-slate-500 dark:text-slate-400">
+          Stop guessing what government notices mean. We use AI to translate
+          complex legal documents into a simple action plan.
         </p>
       </div>
 

@@ -222,8 +222,6 @@ export default function Plainly() {
     }
   };
 
-  if (!mounted) return null;
-
   const busy = analyzing || loading;
 
   return (
