@@ -28,6 +28,11 @@ export async function summarizeText(text: string): Promise<Summary | null> {
         "checklist": [],
         "legalTip": "One helpful insight"
       }
+      
+      STRICT INSTRUCTIONS:
+      1. IGNORE multi-language boilerplate
+      2. IDENTIFY the document type
+      3. EXTRACT action items
 
       CHECKLIST WHITELIST (ONLY include these types of items):
       1. PAYMENTS: (Amount + Date + Primary Method).
@@ -51,15 +56,33 @@ export async function summarizeText(text: string): Promise<Summary | null> {
         - Start every item with a strong verb.
       
       URGENCY CALCULATION:
-        - High: Deadline is within 7 days or has already passed but still within the month.
-        - Medium: Deadline is within 30 days.
-        - Low: Deadline is more than 30 days away.
-        - No: No deadline found, the document is purely informational, or the deadline has already passed for longer than 2 months.
+        - High: Deadline is WITHIN 7 days or has already passed but still within the month.
+        - Medium: Deadline is WITHIN 30 days.
+        - Low: Deadline is MORE than 30 days away.
+        - No: No deadline found, the document is purely INFORMATIONAL, or the deadline has already passed for LONGER than 2 months.
+      
+      EVEN IF the document seems useless, ALWAYS return a JSON with a SUMMARY.
+
+      If you cannot understand the document, if it is too blurry/noisy, or if it contains no extractable requirements, 
+      you MUST return the following JSON with empty values:
+      {
+        "subject": "Unknown Document",
+        "translation": "",
+        "urgency": "No",
+        "deadline": "None",
+        "checklist": [],
+        "legalTip": "We couldn't identify specific actions for this document type."
+      }
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-    const json = response.candidates?.[0]?.content?.parts?.[0]?.text;
+    let json = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
+
+    json = json
+      .replace(/```json/g, "")
+      .replace(/```/g, "")
+      .trim();
 
     if (!json) return null;
 

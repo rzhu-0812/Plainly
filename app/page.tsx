@@ -7,6 +7,7 @@ import HistorySidebar from "@/components/sidebar/history";
 import Navbar from "@/components/navbar/navbar";
 import MobileNav from "@/components/navbar/mobile";
 import SummaryView from "@/components/summary";
+import DeleteModal from "@/components/delete-modal";
 
 import imageCompression from "browser-image-compression";
 import { supabase } from "@/lib/supabase";
@@ -33,6 +34,12 @@ export default function Plainly() {
   const [history, setHistory] = useState<any[]>([]);
   const [currDoc, setCurrDoc] = useState<string | null>(null);
   const [lang, setLang] = useState("en");
+
+  const [deleteModal, setDeleteModal] = useState<{
+    open: boolean;
+    item: any | null;
+    isDeleting: boolean;
+  }>({ open: false, item: null, isDeleting: false });
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -256,21 +263,37 @@ export default function Plainly() {
     }
   };
 
-  const delDoc = async (e: React.MouseEvent, item: any) => {
+  const openDeleteModal = (e: React.MouseEvent, item: any) => {
     e.stopPropagation();
+    setDeleteModal({ open: true, item, isDeleting: false });
+  };
 
-    if (!confirm("Are you sure you want to delete this scan?")) return;
+  const closeDeleteModal = () => {
+    if (!deleteModal.isDeleting) {
+      setDeleteModal({ open: false, item: null, isDeleting: false });
+    }
+  };
 
-    const response = await deleteDoc(item.id, item.file_url);
+  const confirmDelete = async () => {
+    if (!deleteModal.item) return;
+
+    setDeleteModal((prev) => ({ ...prev, isDeleting: true }));
+
+    const response = await deleteDoc(
+      deleteModal.item.id,
+      deleteModal.item.file_url
+    );
     if (response.success) {
       fetchHistory();
-      if (original === item.file_url) {
+      if (original === deleteModal.item.file_url) {
         setSummary(null);
         setResult(null);
         setOriginal(null);
       }
+      setDeleteModal({ open: false, item: null, isDeleting: false });
     } else {
       alert("Failed to delete: " + response.error);
+      setDeleteModal((prev) => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -286,7 +309,7 @@ export default function Plainly() {
         className="hidden"
       />
 
-      <div className="min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors duration-300 selection:bg-blue-100 dark:bg-[#020617] dark:text-slate-100 dark:selection:bg-blue-900">
+      <div className="min-h-screen bg-white font-sans text-slate-900 transition-colors duration-300 selection:bg-slate-200 dark:bg-slate-950 dark:text-slate-100 dark:selection:bg-slate-800">
         <Navbar
           dark={isDark}
           toggle={toggle}
@@ -295,7 +318,7 @@ export default function Plainly() {
           langChange={handleLangChange}
         />
 
-        <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 overflow-hidden lg:grid-cols-12">
+        <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1600px] grid-cols-1 overflow-hidden lg:grid-cols-12">
           <UploadSidebar
             input={fileInput}
             busy={busy}
@@ -317,7 +340,15 @@ export default function Plainly() {
           setOpen={setOpen}
           history={history}
           load={load}
-          delDoc={delDoc}
+          delDoc={openDeleteModal}
+        />
+
+        <DeleteModal
+          isOpen={deleteModal.open}
+          onClose={closeDeleteModal}
+          onConfirm={confirmDelete}
+          itemName={deleteModal.item?.subject}
+          isDeleting={deleteModal.isDeleting}
         />
 
         <MobileNav input={fileInput} setOpen={setOpen} />
