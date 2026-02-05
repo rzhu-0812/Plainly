@@ -26,7 +26,7 @@ export default function SummaryView({
   toggle,
 }: SummaryProps) {
   return (
-    <section className="relative bg-slate-50 p-6 pb-24 md:p-10 md:pb-10 lg:col-span-8 dark:bg-slate-950">
+    <section className="relative bg-slate-50 p-6 md:p-10 lg:col-span-8 dark:bg-slate-950">
       <div className="bg-grid pointer-events-none absolute inset-0" />
       <div className="bg-gradient-fade pointer-events-none absolute inset-0" />
 

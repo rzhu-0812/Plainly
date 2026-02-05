@@ -114,13 +114,13 @@ export default function UploadSidebar({
           className={`upload-zone group w-full cursor-pointer border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100/50 shadow-inner hover:border-slate-400 hover:from-white hover:to-slate-50 hover:shadow-lg dark:border-slate-700 dark:from-slate-900/50 dark:to-slate-900/80 dark:hover:border-slate-500 dark:hover:from-slate-800/50 dark:hover:to-slate-800/80 ${isDragging ? "dragging" : ""} ${busy ? "pointer-events-none opacity-50" : ""}`}
           style={{
             background: !isDragging
-              ? `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(100, 116, 139, 0.25), transparent 50%)`
+              ? `radial-gradient(300px circle at ${mousePos.x}px ${mousePos.y}px, rgba(148, 163, 184, 0.12), transparent 60%)`
               : undefined,
           }}
         >
           <div className="relative flex flex-col items-center justify-center gap-4 p-8 text-center md:p-12">
             <div
-              className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 shadow-slate-900/10 ring-slate-200/80 transition-all duration-300 group-hover:scale-110 group-hover:shadow-xl dark:bg-slate-800 dark:shadow-black/20 dark:ring-slate-700 ${isDragging ? "scale-125 bg-slate-900 dark:bg-white" : ""}`}
+              className={`flex h-16 w-16 items-center justify-center rounded-2xl bg-white shadow-lg ring-1 shadow-slate-900/10 ring-slate-200/80 transition-all duration-300 group-hover:scale-105 dark:bg-slate-800 dark:shadow-black/20 dark:ring-slate-700 ${isDragging ? "scale-110 bg-slate-900 dark:bg-white" : ""}`}
             >
               <Upload
                 className={`h-7 w-7 transition-all duration-300 ${isDragging ? "text-white dark:text-slate-900" : "text-slate-600 group-hover:text-slate-800 dark:text-slate-300 dark:group-hover:text-white"} ${busy ? "animate-pulse" : ""}`}
@@ -154,9 +154,12 @@ export default function UploadSidebar({
               ref={cameraInputRef}
               type="file"
               accept="image/*"
-              capture="environment"
+              capture
               className="hidden"
-              onChange={(e) => handleFiles(e.target.files)}
+              onChange={(e) => {
+                handleFiles(e.target.files);
+                if (cameraInputRef.current) cameraInputRef.current.value = "";
+              }}
             />
             <button
               onClick={(e) => {
@@ -178,8 +181,8 @@ export default function UploadSidebar({
           Privacy First
         </div>
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          All data is encrypted. We serve urban non-profits and small businesses
-          with private, localized document processing.
+          All data is encrypted. We serve urban families and small businesses
+          with private, localized document processing
         </p>
       </div>
     </aside>

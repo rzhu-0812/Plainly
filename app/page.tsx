@@ -5,7 +5,6 @@ import { useState, useEffect, useRef } from "react";
 import UploadSidebar from "@/components/sidebar/upload";
 import HistorySidebar from "@/components/sidebar/history";
 import Navbar from "@/components/navbar/navbar";
-import MobileNav from "@/components/navbar/mobile";
 import SummaryView from "@/components/summary";
 import DeleteModal from "@/components/delete-modal";
 
@@ -350,8 +349,6 @@ export default function Plainly() {
           itemName={deleteModal.item?.subject}
           isDeleting={deleteModal.isDeleting}
         />
-
-        <MobileNav input={fileInput} setOpen={setOpen} />
       </div>
     </div>
   );
