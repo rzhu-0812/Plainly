@@ -12,8 +12,8 @@ import imageCompression from "browser-image-compression";
 import { supabase } from "@/lib/supabase";
 import { OCR } from "@/utils/ocr";
 import { summarizeText } from "@/utils/analyze";
-import { Summary } from "@/types/types";
-import { saveDoc, deleteDoc } from "@/utils/db";
+import { Summary, Checklist } from "@/types/types";
+import { saveDoc, deleteDoc, updateChecklist } from "@/utils/db";
 
 export default function Plainly() {
   const [isDark, setIsDark] = useState(false);
@@ -30,6 +30,7 @@ export default function Plainly() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [original, setOriginal] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
+  const [currDoc, setCurrDoc] = useState<string | null>(null);
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -72,6 +73,8 @@ export default function Plainly() {
   };
 
   const load = (item: any) => {
+    setCurrDoc(item.id);
+
     setSummary({
       subject: item.subject,
       translation: item.translation,
@@ -86,11 +89,33 @@ export default function Plainly() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const handleToggle = async (index: number) => {
+    if (!summary || !currDoc) return;
+
+    const newList = [...summary.checklist];
+    newList[index] = {
+      ...newList[index],
+      done: !newList[index].done,
+    }
+
+    setSummary({
+      ...summary,
+      checklist: newList
+    });
+
+    setHistory((prev) => 
+      prev.map((doc =>
+        doc.id === currDoc? { ...doc, checklist: newList } : doc
+      ))
+    )
+  };
+
   const processDocument = async (file: File) => {
     setAnalyzing(true);
     setResult(null);
     setSummary(null);
     setOriginal(null);
+    setCurrDoc(null);
     setProgress("");
     let text = "";
 
@@ -187,6 +212,7 @@ export default function Plainly() {
             console.log("Document saved in Supabase!");
             URL.revokeObjectURL(url);
             setOriginal(saved.data.file_url);
+            setCurrDoc(saved.data.id)
             fetchHistory();
           }
         } else {
@@ -252,6 +278,7 @@ export default function Plainly() {
             progress={progress}
             result={result}
             original={original}
+            toggle={handleToggle}
           />
         </main>
 

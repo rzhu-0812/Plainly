@@ -1,7 +1,7 @@
 "use server";
 
 import { supabase } from "@/lib/supabase";
-import { Summary } from "@/types/types";
+import { Checklist, Summary } from "@/types/types";
 
 export async function saveDoc(
   file: File,
@@ -64,6 +64,21 @@ export async function deleteDoc(id: string, fileUrl: string) {
     return { success: true };
   } catch (err: any) {
     console.error("Delete Error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function updateChecklist(id: string, checklist: Checklist[]) {
+  try {
+    const { error } = await supabase
+      .from("documents")
+      .update({ checklist })
+      .eq("id", id);
+
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    console.error("Update Checklist Error:", err);
     return { success: false, error: err.message };
   }
 }

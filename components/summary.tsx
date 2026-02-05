@@ -1,5 +1,5 @@
-import { AlertCircle, Clock } from "lucide-react";
-import { Summary } from "@/types/types";
+import { AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { Checklist, Summary } from "@/types/types";
 
 interface SummaryProps {
   busy: boolean;
@@ -7,6 +7,7 @@ interface SummaryProps {
   progress: string;
   result: string | null;
   original: string | null;
+  toggle: (index: number) => void;
 }
 
 export default function SummaryView({
@@ -15,6 +16,7 @@ export default function SummaryView({
   progress,
   result,
   original,
+  toggle
 }: SummaryProps) {
   return (
     <section className="bg-slate-50/50 p-8 md:p-12 lg:col-span-8 dark:bg-slate-950/20">
@@ -72,25 +74,54 @@ export default function SummaryView({
               </div>
             </div>
 
+
             <div className="space-y-6">
               <h4 className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Procedural Checklist
               </h4>
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-                {(busy
-                  ? ["Extracting actions..."]
-                  : summary?.checklist || ["Waiting for document..."]
-                ).map((task, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50 p-4 transition-colors dark:border-slate-800 dark:bg-slate-900/40"
-                  >
-                    <div className="h-5 w-5 flex-shrink-0 rounded border border-slate-300 dark:border-slate-700" />
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                      {task}
+                {busy ? (
+                  <div className="flex items-center gap-4 rounded-lg border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/40">
+                    <div className="h-5 w-5 animate-pulse rounded-full bg-slate-200 dark:bg-slate-800" />
+                    <span className="text-sm text-slate-400">
+                      Extracting actions...
                     </span>
                   </div>
-                ))}
+                ) : summary?.checklist ? (
+                  summary.checklist.map((item: Checklist, i: number) => (
+                    <button
+                      key={i}
+                      onClick={() => toggle(i)}
+                      className={`group flex items-start gap-4 rounded-lg border p-4 text-left transition-all ${
+                        item.done
+                          ? "border-blue-200 bg-blue-50/50 dark:border-blue-900/30 dark:bg-blue-900/10"
+                          : "border-slate-100 bg-slate-50 hover:border-blue-200 hover:bg-white dark:border-slate-800 dark:bg-slate-900/40 dark:hover:border-slate-700"
+                      }`}
+                    >
+                      <div
+                        className={`mt-0.5 h-5 w-5 flex-shrink-0 rounded-full border transition-colors ${
+                          item.done
+                            ? "border-blue-600 bg-blue-600 dark:border-blue-500 dark:bg-blue-500"
+                            : "border-slate-300 bg-white group-hover:border-blue-400 dark:border-slate-600 dark:bg-slate-950"
+                        }`}
+                      />
+                      
+                      <span
+                        className={`text-sm font-medium transition-all ${
+                          item.done
+                            ? "text-slate-400 line-through decoration-slate-400/50"
+                            : "text-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {item.task}
+                      </span>
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-sm text-slate-400">
+                    Waiting for document...
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -103,9 +134,6 @@ export default function SummaryView({
                 className="text-xs font-bold text-blue-600 hover:underline dark:text-blue-400"
               >
                 View Original Document
-              </button>
-              <button className="text-xs font-bold text-slate-400 hover:underline">
-                Download Summary PDF
               </button>
             </div>
           </div>

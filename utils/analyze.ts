@@ -1,7 +1,7 @@
 "use server";
 
 import { model } from "@/lib/gcloud";
-import { Summary } from "@/types/types";
+import { Checklist, Summary } from "@/types/types";
 
 export async function summarizeText(text: string): Promise<Summary | null> {
   try {
@@ -63,7 +63,19 @@ export async function summarizeText(text: string): Promise<Summary | null> {
 
     if (!json) return null;
 
-    return JSON.parse(json) as Summary;
+    const raw = JSON.parse(json);
+
+    const checklist: Checklist[] = (raw.checklist || []).map(
+      (task: string) => ({
+        task,
+        done: false,
+      })
+    );
+
+    return {
+      ...raw,
+      checklist,
+    } as Summary;
   } catch (err) {
     console.error("Gemini Analysis Error:", err);
     return null;
