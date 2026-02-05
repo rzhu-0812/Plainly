@@ -26,6 +26,7 @@ export default function UploadSidebar({
     "visible" | "fading" | "entering"
   >("visible");
   const dropRef = useRef<HTMLDivElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -67,7 +68,7 @@ export default function UploadSidebar({
           Paperwork explained in
           <br />
           <span
-            className={`inline-block bg-gradient-to-r from-amber-600 via-orange-500 to-amber-600 bg-clip-text text-transparent italic transition-all duration-700 ease-out dark:from-amber-400 dark:via-yellow-400 dark:to-amber-400 ${
+            className={`inline-block bg-gradient-to-r from-slate-600 via-slate-500 to-slate-600 bg-clip-text text-transparent italic transition-all duration-700 ease-out dark:from-slate-300 dark:via-white dark:to-slate-300 ${
               animationPhase === "fading"
                 ? "translate-y-3 scale-95 opacity-0 blur-sm"
                 : animationPhase === "entering"
@@ -113,7 +114,7 @@ export default function UploadSidebar({
           className={`upload-zone group w-full cursor-pointer border-slate-300 bg-gradient-to-b from-slate-50 to-slate-100/50 shadow-inner hover:border-slate-400 hover:from-white hover:to-slate-50 hover:shadow-lg dark:border-slate-700 dark:from-slate-900/50 dark:to-slate-900/80 dark:hover:border-slate-500 dark:hover:from-slate-800/50 dark:hover:to-slate-800/80 ${isDragging ? "dragging" : ""} ${busy ? "pointer-events-none opacity-50" : ""}`}
           style={{
             background: !isDragging
-              ? `radial-gradient(400px circle at ${mousePos.x}px ${mousePos.y}px, rgba(148, 163, 184, 0.15), transparent 60%)`
+              ? `radial-gradient(350px circle at ${mousePos.x}px ${mousePos.y}px, rgba(100, 116, 139, 0.25), transparent 50%)`
               : undefined,
           }}
         >
@@ -149,10 +150,18 @@ export default function UploadSidebar({
               </span>
             </div>
 
+            <input
+              ref={cameraInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={(e) => handleFiles(e.target.files)}
+            />
             <button
               onClick={(e) => {
                 e.stopPropagation();
-                input.current?.click();
+                cameraInputRef.current?.click();
               }}
               className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-3.5 font-semibold text-white shadow-lg shadow-slate-900/25 transition-all duration-200 hover:bg-slate-800 hover:shadow-xl active:scale-[0.98] md:hidden dark:bg-white dark:text-slate-900 dark:shadow-black/20"
             >
@@ -169,8 +178,8 @@ export default function UploadSidebar({
           Privacy First
         </div>
         <p className="text-xs leading-relaxed text-slate-500 dark:text-slate-400">
-          End-to-end encryption. Your documents are processed securely and never
-          stored without permission.
+          All data is encrypted. We serve urban non-profits and small businesses
+          with private, localized document processing.
         </p>
       </div>
     </aside>
