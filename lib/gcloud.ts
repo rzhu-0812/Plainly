@@ -1,5 +1,6 @@
 import { ImageAnnotatorClient } from "@google-cloud/vision";
 import { VertexAI } from "@google-cloud/vertexai";
+import { TranslationServiceClient } from "@google-cloud/translate";
 
 const creds = JSON.parse(process.env.GCLOUD_API_KEY || "{}");
 
@@ -28,3 +29,12 @@ export const model = vertex.getGenerativeModel({
     responseMimeType: "application/json",
   },
 });
+
+export const translateClient = new TranslationServiceClient({
+  credentials: {
+    client_email: creds.client_email,
+    private_key: creds.private_key?.replace(/\\n/g, "\n"),
+  },
+});
+
+export const projectId = creds.project_id;

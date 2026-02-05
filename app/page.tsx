@@ -14,6 +14,7 @@ import { OCR } from "@/utils/ocr";
 import { summarizeText } from "@/utils/analyze";
 import { Summary, Checklist } from "@/types/types";
 import { saveDoc, deleteDoc, updateChecklist } from "@/utils/db";
+import { translateSummary } from "@/utils/translate";
 
 export default function Plainly() {
   const [isDark, setIsDark] = useState(false);
@@ -31,6 +32,7 @@ export default function Plainly() {
   const [original, setOriginal] = useState<string | null>(null);
   const [history, setHistory] = useState<any[]>([]);
   const [currDoc, setCurrDoc] = useState<string | null>(null);
+  const [lang, setLang] = useState("en");
 
   const fileInput = useRef<HTMLInputElement>(null);
 
@@ -96,18 +98,40 @@ export default function Plainly() {
     newList[index] = {
       ...newList[index],
       done: !newList[index].done,
-    }
+    };
 
     setSummary({
       ...summary,
-      checklist: newList
+      checklist: newList,
     });
 
-    setHistory((prev) => 
-      prev.map((doc =>
-        doc.id === currDoc? { ...doc, checklist: newList } : doc
-      ))
-    )
+    setHistory((prev) =>
+      prev.map((doc) =>
+        doc.id === currDoc ? { ...doc, checklist: newList } : doc
+      )
+    );
+  };
+
+  const handleLangChange = async (newLang: string) => {
+    if (!summary || newLang === lang) {
+      setLang(newLang);
+      return;
+    }
+
+    setLoading(true);
+    setProgress(`Translating to ${newLang.toUpperCase()}...`);
+
+    const translated = await translateSummary(summary, newLang);
+
+    if (translated) {
+      setSummary(translated);
+      setLang(newLang);
+    } else {
+      alert("Translation failed.");
+    }
+
+    setLoading(false);
+    setProgress("");
   };
 
   const processDocument = async (file: File) => {
@@ -127,7 +151,7 @@ export default function Plainly() {
         setProgress("Processing PDF...");
 
         const pdfjs = await import("pdfjs-dist");
-        pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
+        pdfjs.GlobalWorkerOptions.workerSrc = "/pdf.worker.min.mjs";
 
         const arrayBuff = await file.arrayBuffer();
         const pdf = await pdfjs.getDocument({ data: arrayBuff }).promise;
@@ -212,7 +236,7 @@ export default function Plainly() {
             console.log("Document saved in Supabase!");
             URL.revokeObjectURL(url);
             setOriginal(saved.data.file_url);
-            setCurrDoc(saved.data.id)
+            setCurrDoc(saved.data.id);
             fetchHistory();
           }
         } else {
@@ -263,7 +287,13 @@ export default function Plainly() {
       />
 
       <div className="min-h-screen bg-slate-50 font-sans text-slate-900 transition-colors duration-300 selection:bg-blue-100 dark:bg-[#020617] dark:text-slate-100 dark:selection:bg-blue-900">
-        <Navbar dark={isDark} toggle={toggle} setOpen={setOpen} />
+        <Navbar
+          dark={isDark}
+          toggle={toggle}
+          setOpen={setOpen}
+          currLang={lang}
+          langChange={handleLangChange}
+        />
 
         <main className="mx-auto grid min-h-[calc(100vh-4rem)] max-w-[1440px] grid-cols-1 overflow-hidden lg:grid-cols-12">
           <UploadSidebar

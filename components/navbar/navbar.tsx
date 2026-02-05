@@ -1,12 +1,35 @@
-import { FileText, Languages, Sun, Moon } from "lucide-react";
+import { useState } from "react";
+import { FileText, Languages, Sun, Moon, ChevronDown } from "lucide-react";
 
 interface NavbarProps {
   dark: boolean;
   toggle: () => void;
   setOpen: (open: boolean) => void;
+  currLang: string;
+  langChange: (lang: string) => void;
 }
 
-export default function Navbar({ dark, toggle, setOpen }: NavbarProps) {
+export default function Navbar({
+  dark,
+  toggle,
+  setOpen,
+  currLang,
+  langChange,
+}: NavbarProps) {
+  const [langOpen, setLangOpen] = useState(false);
+
+  const langs = [
+    { code: "en", label: "EN" },
+    { code: "es", label: "ES" },
+    { code: "zh", label: "ZH" },
+    { code: "fr", label: "FR" },
+  ];
+
+  const handleSelect = (language: string) => {
+    langChange(language);
+    setLangOpen(false);
+  };
+
   return (
     <nav className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-6 backdrop-blur-md dark:border-slate-800 dark:bg-[#020617]/80">
       <div className="flex items-center gap-8">
@@ -27,9 +50,6 @@ export default function Navbar({ dark, toggle, setOpen }: NavbarProps) {
           >
             History
           </button>
-          <button className="transition hover:text-slate-900 dark:hover:text-slate-100">
-            Reminders
-          </button>
         </div>
       </div>
 
@@ -45,10 +65,40 @@ export default function Navbar({ dark, toggle, setOpen }: NavbarProps) {
           )}
         </button>
         <div className="h-4 w-px bg-slate-200 dark:border-slate-800" />
-        <button className="flex items-center gap-2 rounded bg-slate-900 px-3 py-1.5 text-xs font-bold tracking-widest text-white uppercase dark:bg-white dark:text-slate-900">
-          <Languages className="h-3.5 w-3.5" />
-          EN
-        </button>
+
+        <div className="relative">
+          <button
+            onClick={() => setLangOpen(!langOpen)}
+            className="flex items-center gap-2 rounded bg-slate-900 px-3 py-1.5 text-xs font-bold tracking-widest text-white uppercase dark:bg-white dark:text-slate-900"
+          >
+            <Languages className="h-3.5 w-3.5" />
+            {currLang.toUpperCase()}
+            <ChevronDown
+              className={`h-3 w-3 transition-transform ${langOpen ? "rotate-180" : ""}`}
+            />
+          </button>
+
+          {langOpen && (
+            <>
+              <div
+                className="fixed inset-0 z-40"
+                onClick={() => setLangOpen(false)}
+              />
+
+              <div className="absolute top-full right-0 z-50 mt-2 flex w-24 flex-col rounded-md border border-slate-200 bg-white py-1 shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                {langs.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => handleSelect(l.code)}
+                    className="px-4 py-2 text-left text-xs font-bold transition-colors hover:bg-slate-50 dark:hover:bg-slate-800"
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

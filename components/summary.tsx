@@ -1,4 +1,4 @@
-import { AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Clock } from "lucide-react";
 import { Checklist, Summary } from "@/types/types";
 
 interface SummaryProps {
@@ -16,7 +16,7 @@ export default function SummaryView({
   progress,
   result,
   original,
-  toggle
+  toggle,
 }: SummaryProps) {
   return (
     <section className="bg-slate-50/50 p-8 md:p-12 lg:col-span-8 dark:bg-slate-950/20">
@@ -74,7 +74,6 @@ export default function SummaryView({
               </div>
             </div>
 
-
             <div className="space-y-6">
               <h4 className="text-xs font-bold tracking-widest text-slate-400 uppercase">
                 Procedural Checklist
@@ -105,7 +104,7 @@ export default function SummaryView({
                             : "border-slate-300 bg-white group-hover:border-blue-400 dark:border-slate-600 dark:bg-slate-950"
                         }`}
                       />
-                      
+
                       <span
                         className={`text-sm font-medium transition-all ${
                           item.done

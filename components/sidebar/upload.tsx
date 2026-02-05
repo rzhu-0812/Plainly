@@ -17,7 +17,9 @@ export default function UploadSidebar({
       <div className="space-y-4">
         <h1 className="text-3xl font-semibold tracking-tight text-slate-900 dark:text-white">
           Paperwork explained in
-          <span className="mt-1 block italic text-blue-600">plain English.</span>
+          <span className="mt-1 block text-blue-600 italic">
+            plain English.
+          </span>
         </h1>
         <p className="text-base leading-relaxed text-slate-500 dark:text-slate-400">
           Stop guessing what government notices mean. We use AI to translate
